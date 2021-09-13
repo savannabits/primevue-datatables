@@ -1,4 +1,4 @@
-# Very short description of the package
+# Laravel + PrimeVue Datatables
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/savannabits/primevue-datatables.svg?style=flat-square)](https://packagist.org/packages/savannabits/primevue-datatables)
 [![Total Downloads](https://img.shields.io/packagist/dt/savannabits/primevue-datatables.svg?style=flat-square)](https://packagist.org/packages/savannabits/primevue-datatables)

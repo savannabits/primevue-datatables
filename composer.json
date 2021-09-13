@@ -1,0 +1,58 @@
+{
+    "name": "savannabits/primevue-datatables",
+    "description": "Easy Laravel Server-Side implementation of PrimeVue Datatables",
+    "keywords": [
+        "savannabits",
+        "primevue-datatables",
+        "laravel",
+        "primevue",
+        "datatables",
+        "server-side"
+    ],
+    "homepage": "https://github.com/savannabits/primevue-datatables",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Sam Maosa",
+            "email": "maosa.sam@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "illuminate/support": "^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Savannabits\\PrimevueDatatables\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Savannabits\\PrimevueDatatables\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Savannabits\\PrimevueDatatables\\PrimevueDatatablesServiceProvider"
+            ],
+            "aliases": {
+                "PrimevueDatatables": "Savannabits\\PrimevueDatatables\\PrimevueDatatablesFacade"
+            }
+        }
+    }
+}

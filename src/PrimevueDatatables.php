@@ -1,0 +1,147 @@
+<?php
+
+namespace Savannabits\PrimevueDatatables;
+
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use ReflectionClass;
+use Throwable;
+class PrimevueDatatables
+{
+    /**
+     * @var Builder|\Illuminate\Database\Query\Builder
+     */
+    private \Illuminate\Database\Query\Builder|Builder $query;
+    private ?int $currentPage;
+    private $sort;
+    private $sortDirection;
+    private array $_searchableColumns;
+    /**
+     * @var int
+     */
+    private $perPage;
+    private array $filters;
+    private array $_dtParams;
+
+    public function __construct(Builder $query)
+    {
+        $this->query = $query;
+        $this->_dtParams = json_decode(request()->get('dt_params', "[]"), true);
+        $this->_searchableColumns
+        = json_decode(request()->get('searchable_columns',"[]"), true);
+    }
+
+    public function dtParams(array $params): static
+    {
+        $this->_dtParams = $params;
+        return $this;
+    }
+
+    public function searchableColumns(array $searchable_columns): static
+    {
+        $this->_searchableColumns = $searchable_columns;
+        return $this;
+    }
+
+    public static function of(Builder $query): static
+    {
+        return new self($query);
+    }
+
+    public function make(): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $this->currentPage = collect($this->_dtParams)->get("page", 0) + 1;
+        $this->perPage = collect($this->_dtParams)->get("rows", 10);
+
+        $filters = collect($this->_dtParams)->get("filters", []);
+        $this->sort = collect($this->_dtParams)->get('sortField');
+        $this->sortDirection = collect($this->_dtParams)->get('sortOrder') == 1 ? 'asc' : 'desc';
+        $global = collect(collect($filters)->get("global") ?? null);
+        $localFilters = collect($filters)->except("global");
+
+        $columnNames = $this->_searchableColumns;
+        $query = $this->query
+            ->where(function (Builder $q) use ($columnNames, $global) {
+                // Global Search
+                if (count($columnNames) && $global && collect($global)->get("value")) {
+                    $firstColumn = collect($columnNames)->get(0);
+                    $otherColumns = collect($columnNames)->except(0);
+                    $firstFilter = new Filter($firstColumn, collect($global)->get("value"), collect($global)->get("matchMode"));
+                    $this->applyFilter($firstFilter, $q);
+                    foreach ($otherColumns as $column) {
+                        $colFilter = new Filter($column, collect($global)->get("value"), collect($global)->get("matchMode"));
+                        $this->applyFilter($colFilter, $q, true);
+                    }
+                }
+            })->where(function (Builder $q) use ($localFilters) {
+                // Local filters
+                foreach ($localFilters as $field => $filter) {
+                    if (collect($filter)->get("value")) {
+                        $instance = new Filter($field, collect($filter)->get("value"), collect($filter)->get("matchMode"));
+                        $this->applyFilter($instance, $q);
+                    }
+                }
+            });
+        $with = collect([]);
+        foreach ($columnNames as $columnName) {
+            $exploded = explode(".", $columnName);
+            if (sizeof($exploded) == 2) {
+                $with->push($exploded[0]);
+            } elseif (sizeof($exploded) == 3) {
+                $with->push($exploded[0] . "." . $exploded[1]);
+            }
+        }
+        $query->with($with->toArray());
+        $this->applySort($query);
+        return $query->paginate($this->perPage, page: $this->currentPage);
+    }
+
+    private function applyFilter(Filter $filter, Builder &$q, $or = false)
+    {
+        // Apply Search to a depth of 3
+        $filter->buildWhere($q, $or);
+    }
+
+    private function applySort(Builder &$q)
+    {
+        if ($this->sort != null) {
+            $key = explode(".", $this->sort);
+            if (sizeof($key) === 1) {
+                $q->orderBy($this->sort, $this->sortDirection ?? 'asc');
+            } elseif (sizeof($key) === 2) {
+                $relationship = $this->getRelatedFromMethodName($key[0], get_class($q->getModel()));
+                if ($relationship) {
+                    $ownerKey = $relationship->getOwnerKeyName();
+                    $fKey = $relationship->getForeignKeyName();
+                    $fTable = $relationship->getRelated()->getTable();
+                    $ownerTable = $relationship->getParent()->getTable();
+                    if ($relationship instanceof BelongsTo) {
+                        $q->orderBy(
+                            get_class($relationship->getRelated())::query()->select($key[1])->whereColumn("$fTable.$ownerKey", "$ownerTable.$fKey"),
+                            $this->sortDirection ?? 'asc'
+                        );
+                    } elseif ($relationship instanceof HasOne) {
+                        $q->orderBy(
+                            get_class($relationship->getRelated())::select($key[1])->whereColumn("$fTable.$fKey", "$ownerTable.$ownerKey"),
+                            $this->sortDirection ?? 'asc'
+                        );
+                    }
+                    /*$q->join($fTable, "$ownerTable.$fKey", '=', "$fTable.$ownerKey")
+                        ->orderBy($fTable.".".$key[1],$this->sortDirection ?? 'asc');*/
+                    /*$q->orderBy($fKey,$this->sortDirection ?? 'asc');*/
+                }
+            }
+        }
+    }
+
+    private function getRelatedFromMethodName(string $method_name, string $class)
+    {
+        try {
+            $method = (new ReflectionClass($class))->getMethod($method_name);
+            return $method->invoke(new $class);
+        } catch (Throwable $exception) {
+            return null;
+        }
+    }
+}

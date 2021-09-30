@@ -24,9 +24,8 @@ class PrimevueDatatables
     private array $filters;
     private array $_dtParams;
 
-    public function __construct(Builder $query)
+    public function __construct()
     {
-        $this->query = $query;
         $this->_dtParams = json_decode(request()->get('dt_params', "[]"), true);
         $this->_searchableColumns
         = json_decode(request()->get('searchable_columns',"[]"), true);
@@ -44,9 +43,14 @@ class PrimevueDatatables
         return $this;
     }
 
+    public function query(Builder $query): static {
+        $this->query = $query;
+        return $this;
+    }
     public static function of(Builder $query): static
     {
-        return new self($query);
+        $instance = new self($query);
+        return $instance->query($query);
     }
 
     public function make(): \Illuminate\Contracts\Pagination\LengthAwarePaginator

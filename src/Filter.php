@@ -1,4 +1,5 @@
 <?php
+
 namespace Savannabits\PrimevueDatatables;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +29,7 @@ class Filter
     public function buildWhere(Builder &$q, ?bool $or = false)
     {
         $searchParts = explode(".", $this->field);
-        if (count($searchParts) <= 3) {
+        if (count($searchParts) <= 4) {
             switch (count($searchParts)) {
                 case 1:
                     $this->applyWhere($q, $searchParts[0], $or);
@@ -56,6 +57,25 @@ class Filter
                         $q->whereHas($searchParts[0], function ($q1) use ($searchParts) {
                             $q1->whereHas($searchParts[1], function ($q2) use ($searchParts) {
                                 $this->applyWhere($q2, $searchParts[2]);
+                            });
+                        });
+                    }
+                    break;
+                case  4:
+                    if ($or) {
+                        $q->orWhereHas($searchParts[0], function ($q1) use ($searchParts) {
+                            $q1->whereHas($searchParts[1], function ($q2) use ($searchParts) {
+                                $q2->whereHas($searchParts[2], function ($q3) use ($searchParts) {
+                                    $this->applyWhere($q3, $searchParts[3]);
+                                });
+                            });
+                        });
+                    } else {
+                        $q->whereHas($searchParts[0], function ($q1) use ($searchParts) {
+                            $q1->whereHas($searchParts[1], function ($q2) use ($searchParts) {
+                                $q2->whereHas($searchParts[2], function ($q3) use ($searchParts) {
+                                    $this->applyWhere($q3, $searchParts[3]);
+                                });
                             });
                         });
                     }

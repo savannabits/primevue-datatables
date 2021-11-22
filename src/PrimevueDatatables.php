@@ -81,9 +81,18 @@ class PrimevueDatatables
             })->where(function (Builder $q) use ($localFilters) {
                 // Local filters
                 foreach ($localFilters as $field => $filter) {
-                    if (collect($filter)->get("value")) {
-                        $instance = new Filter($field, collect($filter)->get("value"), collect($filter)->get("matchMode"));
-                        $this->applyFilter($instance, $q);
+                    if(isset($filter['constraints'])){
+                        foreach($filter['constraints'] as $const){
+                            if ($const["value"]) {
+                                $instance = new Filter($field, $const["value"], $const["matchMode"]);
+                                $this->applyFilter($instance, $q, $filter['operator'] == 'or' ? true : false);
+                            }
+                        }
+                    } else {
+                        if (collect($filter)->get("value")) {
+                            $instance = new Filter($field, collect($filter)->get("value"), collect($filter)->get("matchMode"));
+                            $this->applyFilter($instance, $q);
+                        }
                     }
                 }
             });

@@ -89,7 +89,7 @@ class PrimevueDatatables
                             }
                         }
                     } else {
-                        if (collect($filter)->get("value")) {
+                        if (collect($filter)->get("value") !== null) {
                             $instance = new Filter($field, collect($filter)->get("value"), collect($filter)->get("matchMode"));
                             $this->applyFilter($instance, $q);
                         }

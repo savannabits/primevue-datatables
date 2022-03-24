@@ -41,6 +41,7 @@ You have to pass the following parameters as query params from the client:
 1. Searchable Columns **(Passed as `searchable_columns`)** - Used to specify the columns that will be used to perform the global datatable search
 2. Dt Params **(Passed as `dt_params`)** - This is the main Datatable event object as received from PrimeVue. See [Lazy Datatable](https://primefaces.org/primevue/showcase/#/datatable/lazy) documentation for more details
 ### Client Side:
+**Here is a gist of a [Fully Working Vue3 + Tailwindcss component](https://gist.github.com/coolsam726/f156daa5b36a7a8217526eb82bcaa798) for the client side**.<br>
 Go through [PrimeVue's Lazy Datatable](https://primefaces.org/primevue/showcase/#/datatable/lazy) documentation for details on frontend implementation.
 
 Here is an example of your `loadLazyData()` implementation:

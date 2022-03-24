@@ -6,6 +6,8 @@
 
 This is a simple, clean and fluent serve-side implementation of [PrimeVue Datatables](https://primefaces.org/primevue/showcase/#/datatable) in [Laravel](https://laravel.com/).
 
+![image](https://user-images.githubusercontent.com/5610289/159969279-155b736d-a1fa-49c8-a34a-cccc775103a4.png)
+
 ## Features
 - Global Search including searching in relationships up to a depth of 3, e.g `author.user.name`
 - Per-Column filtering out of the box

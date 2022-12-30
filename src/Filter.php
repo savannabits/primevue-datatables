@@ -22,8 +22,12 @@ class Filter
     const DATE_IS_NOT = 'dateIsNot';
     const DATE_BEFORE = 'dateBefore';
     const DATE_AFTER = 'dateAfter';
+
+    private $likeOperator = 'LIKE';
+    
     public function __construct(public string $field, public ?string $value = null, public ?string $matchMode = self::CONTAINS)
     {
+        $this->likeOperator = \DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'pgsql' ? 'ILIKE' : 'LIKE'; 
     }
 
     public function buildWhere(Builder &$q, ?bool $or = false)
@@ -90,23 +94,23 @@ class Filter
         switch ($this->matchMode) {
             case self::STARTS_WITH:
                 if ($or) {
-                    $q->orWhere($field, "LIKE", $this->value . "%");
+                    $q->orWhere($field, $this->likeOperator, $this->value . "%");
                 } else {
-                    $q->where($field, "LIKE", $this->value . "%");
+                    $q->where($field, $this->likeOperator, $this->value . "%");
                 }
                 break;
             case self::NOT_CONTAINS:
                 if ($or) {
-                    $q->orWhere($field, "NOT LIKE", "%" . $this->value . "%");
+                    $q->orWhere($field, "NOT" . $this->likeOperator, "%" . $this->value . "%");
                 } else {
-                    $q->where($field, "NOT LIKE", "%" . $this->value . "%");
+                    $q->where($field, "NOT" . $this->likeOperator, "%" . $this->value . "%");
                 }
                 break;
             case self::ENDS_WITH:
                 if ($or) {
-                    $q->orWhere($field, "LIKE", "%" . $this->value);
+                    $q->orWhere($field, $this->likeOperator, "%" . $this->value);
                 } else {
-                    $q->where($field, "LIKE", "%" . $this->value);
+                    $q->where($field, $this->likeOperator, "%" . $this->value);
                 }
                 break;
             case self::EQUALS:
@@ -192,9 +196,9 @@ class Filter
             case self::CONTAINS:
             default:
                 if ($or) {
-                    $q->orWhere($field, "LIKE", "%" . $this->value . "%");
+                    $q->orWhere($field, $this->likeOperator, "%" . $this->value . "%");
                 } else {
-                    $q->where($field, "LIKE", "%" . $this->value . "%");
+                    $q->where($field, $this->likeOperator, "%" . $this->value . "%");
                 }
                 break;
         }

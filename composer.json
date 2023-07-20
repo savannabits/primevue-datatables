@@ -1,5 +1,5 @@
 {
-    "name": "savannabits/primevue-datatables",
+    "name": "Julian367/primevue-datatables",
     "description": "Easy Laravel Server-Side implementation of PrimeVue Datatables",
     "keywords": [
         "savannabits",
@@ -9,7 +9,7 @@
         "datatables",
         "server-side"
     ],
-    "homepage": "https://github.com/savannabits/primevue-datatables",
+    "homepage": "https://github.com/Julian367/primevue-datatables",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -21,7 +21,7 @@
     ],
     "require": {
         "php": "^7.4|^8.0|^8.1",
-        "illuminate/support": "^8.0|^9.0"
+        "illuminate/support": "^8.0|^9.0|^10.0"
     },
     "require-dev": {
         "orchestra/testbench": "^6.0|^7.0",

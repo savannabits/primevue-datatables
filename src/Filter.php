@@ -114,14 +114,14 @@ class Filter
             case self::NOT_CONTAINS:
                 if ($or) {
                     if(!$jsonField) {
-                        $q->orWhere($field, "NOT" . $this->likeOperator, "%" . $this->value . "%");
+                        $q->orWhere($field, "NOT " . $this->likeOperator, "%" . $this->value . "%");
                     }
                     else {
                         $q->orWhereRaw('LOWER('.$jsonField[0].'->>"$.'.$jsonField[1].'") NOT '.$this->likeOperator.' ?', mb_strtolower("%" . $this->value . "%"));
                     }
                 } else {
                     if(!$jsonField) {
-                        $q->where($field, "NOT" . $this->likeOperator, "%" . $this->value . "%");
+                        $q->where($field, "NOT " . $this->likeOperator, "%" . $this->value . "%");
                     }
                     else {
                         $q->whereRaw('LOWER('.$jsonField[0].'->>"$.'.$jsonField[1].'") NOT '.$this->likeOperator.' ?', mb_strtolower("%" . $this->value . "%"));

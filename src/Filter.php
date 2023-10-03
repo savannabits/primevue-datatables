@@ -25,7 +25,7 @@ class Filter
 
     private $likeOperator = 'LIKE';
 
-    public function __construct(public string $field, public ?string $value = null, public ?string $matchMode = self::CONTAINS)
+    public function __construct(public string $field, public $value = null, public ?string $matchMode = self::CONTAINS)
     {
         $this->likeOperator = \DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'pgsql' ? 'ILIKE' : 'LIKE';
     }

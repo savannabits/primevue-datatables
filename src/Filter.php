@@ -25,7 +25,7 @@ class Filter
 
     private $likeOperator = 'LIKE';
 
-    public function __construct(public string $field, public ?string $value = null, public ?string $matchMode = self::CONTAINS)
+    public function __construct(public string $field, public $value = null, public ?string $matchMode = self::CONTAINS)
     {
         $this->likeOperator = \DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME) == 'pgsql' ? 'ILIKE' : 'LIKE';
     }
@@ -114,14 +114,14 @@ class Filter
             case self::NOT_CONTAINS:
                 if ($or) {
                     if(!$jsonField) {
-                        $q->orWhere($field, "NOT" . $this->likeOperator, "%" . $this->value . "%");
+                        $q->orWhere($field, "NOT " . $this->likeOperator, "%" . $this->value . "%");
                     }
                     else {
                         $q->orWhereRaw('LOWER('.$jsonField[0].'->>"$.'.$jsonField[1].'") NOT '.$this->likeOperator.' ?', mb_strtolower("%" . $this->value . "%"));
                     }
                 } else {
                     if(!$jsonField) {
-                        $q->where($field, "NOT" . $this->likeOperator, "%" . $this->value . "%");
+                        $q->where($field, "NOT " . $this->likeOperator, "%" . $this->value . "%");
                     }
                     else {
                         $q->whereRaw('LOWER('.$jsonField[0].'->>"$.'.$jsonField[1].'") NOT '.$this->likeOperator.' ?', mb_strtolower("%" . $this->value . "%"));
@@ -180,7 +180,11 @@ class Filter
                 }
                 break;
             case self::IN:
-                //TODO: Implement
+                if ($or) {
+                    $q->orWhereIn($field, $this->value);
+                } else {
+                    $q->whereIn($field, $this->value);
+                }
                 break;
             case self::LESS_THAN:
                 if ($or) {
